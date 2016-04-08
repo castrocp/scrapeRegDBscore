@@ -3,6 +3,7 @@
 import urllib2
 import urllib
 import time
+import sys
 
 
 #run program as:
@@ -12,20 +13,30 @@ def main():
 
     inFileName = sys.argv[1]
 
+    CoordList = []
+
     with open (inFileName, 'r') as infile:  #when you use "with open" you don't have to close the file later
-        with open (inFileName + ".RegDBscores", "w") as scoreFile:
-
-            
-
+            for line in infile:
+                if line.startswith("#"):   
+                    next(infile) #skip over info and header lines
+                elif line.startswith("chr"):  #the last couple lines of VCF with variant count and run time will be ignored
+                    (chrom, pos, ID, ref, alt, qual, Filter, info, format, geno1, geno2, geno3)= line.strip("\n").split("\t")
+                    CoordList.append(chrom + ":" + pos + "-" + pos)
+    
+    with open (inFileName + ".RegDBscores", "w") as scoreFile:
+        getRegulomeDBDataWithList(CoordList,scoreFile,1000) 
+        #still not sure what the last argument controls.  Arbitrarily put in large # for now
+                
+'''
     TestCoordList = ['chr1:114314555-114314555', 'chrX:55041618-55041618',  'chr11:5248049-5248049']
     print(TestCoordList)
 
     with open ("TestOutfileScraper", "w") as TestOutFile: 
 
         getRegulomeDBDataWithList(TestCoordList, TestOutFile, 5) 
-
-
 '''
+
+
 # HttpBot
 # -------
 # This class opens a handler and can GET and POST to a url.
@@ -151,6 +162,6 @@ def getRegulomeDBDataWithList(coordList, outfile, numPerRequest):
     
 
 #print getRegulomeDBData('chrX:55041618-55041619')
-'''
+
 if __name__ == '__main__':
     main()
